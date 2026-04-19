@@ -1,72 +1,70 @@
-const getTempClass = (temp) => {
-  if (temp >= 35) return "hot";
-  if (temp >= 28) return "warm";
-  if (temp < 18) return "cool";
-  return "normal";
-};
+export default function RecentReadings({ data }) {
+  const rows = [...data].reverse().slice(0, 20);
 
-export default function RecentReadings({ readings }) {
-  if (readings.length === 0) {
-    return (
-      <div className="table-card">
-        <div className="table-empty">Belum ada data masuk</div>
-      </div>
-    );
-  }
+  const statusOf = (t) => {
+    if (t < 18)
+      return { label: "Terlalu dingin", cls: "cool" };
+    if (t > 26)
+      return { label: "Terlalu panas", cls: "warning" };
+    return { label: "Normal", cls: "normal" };
+  };
+
+  const tempClass = (t) => {
+    if (t >= 35) return "hot";
+    if (t >= 28) return "warm";
+    if (t < 18) return "cool";
+    return "normal";
+  };
 
   return (
     <div className="table-card">
-      <table className="readings-table">
-        <thead>
-          <tr>
-            <th>Waktu</th>
-            <th>Suhu</th>
-            <th>Kelembaban</th>
-            <th>Sensor</th>
-          </tr>
-        </thead>
-        <tbody>
-          {readings.map((r) => (
-            <tr key={r.id}>
-              <td className="time-cell">
-                {new Date(r.created_at).toLocaleString("id-ID", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                })}
-              </td>
-              <td>
-                <span className={`temp-badge ${getTempClass(r.temperature)}`}>
-                  {r.temperature.toFixed(1)}°C
-                </span>
-              </td>
-              <td
-                style={{
-                  fontFamily: "Space Mono",
-                  fontSize: 13,
-                  color: r.humidity !== null ? "#a5b4fc" : "#374151",
-                }}
-              >
-                {r.humidity !== null && r.humidity !== undefined
-                  ? `${r.humidity.toFixed(1)}%`
-                  : "—"}
-              </td>
-              <td
-                style={{
-                  fontFamily: "Space Mono",
-                  fontSize: 12,
-                  color: "#6b7280",
-                }}
-              >
-                {r.sensor_id}
-              </td>
+      <div className="table-header">
+        <span className="table-title">Data Terbaru</span>
+        <span className="table-count">{rows.length} data</span>
+      </div>
+      {rows.length === 0 ? (
+        <div className="table-empty">
+          Tidak ada data pada rentang ini.
+        </div>
+      ) : (
+        <table className="readings-table">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Suhu</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((d, i) => {
+              const s = statusOf(d.temperature);
+              return (
+                <tr key={i}>
+                  <td className="time-cell">
+                    {new Date(d.recorded_at).toLocaleString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </td>
+                  <td>
+                    <span className={`temp-badge ${tempClass(d.temperature)}`}>
+                      {d.temperature.toFixed(1)}°C
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`status-pill ${s.cls}`}>
+                      {s.label}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

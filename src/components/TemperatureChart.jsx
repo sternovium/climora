@@ -1,187 +1,145 @@
+import { Line } from "react-chartjs-2";
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
   Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-} from "recharts";
+  Filler,
+  Legend,
+} from "chart.js";
 
-const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div
-      style={{
-        background: "#1e2535",
-        border: "1px solid rgba(255,255,255,0.1)",
-        borderRadius: 8,
-        padding: "10px 14px",
-        fontFamily: "Space Mono, monospace",
-        fontSize: 12,
-      }}
-    >
-      <p style={{ color: "#6b7280", marginBottom: 4 }}>{label}</p>
-      <p style={{ color: "#22d3ee" }}>
-        Suhu: {payload[0]?.value?.toFixed(1)}°C
-      </p>
-      {payload[1] && (
-        <p style={{ color: "#818cf8" }}>
-          Kelembaban: {payload[1]?.value?.toFixed(1)}%
-        </p>
-      )}
-    </div>
-  );
-};
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Filler,
+  Legend,
+);
 
-export default function TemperatureChart({ readings }) {
-  const data = readings.map((r) => ({
-    time: new Date(r.created_at).toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }),
-    temperature: parseFloat(r.temperature.toFixed(2)),
-    humidity:
-      r.humidity !== null && r.humidity !== undefined
-        ? parseFloat(r.humidity.toFixed(2))
-        : undefined,
-  }));
-
-  const hasHumidity = readings.some(
-    (r) => r.humidity !== null && r.humidity !== undefined,
-  );
-
-  if (data.length === 0) {
+export default function TemperatureChart({ data }) {
+  if (!data || data.length === 0) {
     return (
       <div className="chart-card">
-        <div className="chart-empty">Belum ada data untuk ditampilkan</div>
+        <p className="chart-title">Riwayat Suhu</p>
+        <div className="chart-empty">Tidak ada data untuk ditampilkan.</div>
       </div>
     );
   }
 
+  const labels = data.map((d) =>
+    new Date(d.recorded_at).toLocaleString("id-ID", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  );
+  const temps = data.map((d) => d.temperature);
+
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: "Suhu sensor",
+        data: temps,
+        borderColor: "#22d3ee",
+        backgroundColor: (ctx) => {
+          const chart = ctx.chart;
+          const { ctx: canvasCtx, chartArea } = chart;
+          if (!chartArea) return "rgba(34,211,238,0.1)";
+          const gradient = canvasCtx.createLinearGradient(
+            0,
+            chartArea.top,
+            0,
+            chartArea.bottom,
+          );
+          gradient.addColorStop(0, "rgba(34,211,238,0.25)");
+          gradient.addColorStop(1, "rgba(34,211,238,0.02)");
+          return gradient;
+        },
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "#22d3ee",
+        pointHoverBorderColor: "#fff",
+        pointHoverBorderWidth: 2,
+        fill: true,
+        tension: 0.4,
+      },
+      {
+        label: "Batas atas (26°C)",
+        data: data.map(() => 26),
+        borderColor: "rgba(248, 113, 113, 0.5)",
+        borderDash: [6, 4],
+        borderWidth: 1,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: false,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: "rgba(18, 22, 31, 0.95)",
+        titleColor: "#e8eaf0",
+        bodyColor: "#9ca3af",
+        borderColor: "rgba(255,255,255,0.1)",
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
+        titleFont: { family: "Space Mono" },
+        bodyFont: { family: "DM Sans" },
+        callbacks: {
+          label: (ctx) =>
+            ctx.dataset.label === "Suhu sensor"
+              ? `Suhu: ${ctx.parsed.y.toFixed(1)}°C`
+              : ctx.dataset.label,
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          autoSkip: true,
+          maxTicksLimit: 8,
+          color: "#6b7280",
+          font: { family: "Space Mono", size: 10 },
+        },
+        grid: { color: "rgba(255,255,255,0.04)" },
+        border: { color: "rgba(255,255,255,0.06)" },
+      },
+      y: {
+        min: 15,
+        max: 40,
+        ticks: {
+          callback: (v) => v + "°C",
+          color: "#6b7280",
+          font: { family: "Space Mono", size: 10 },
+        },
+        grid: { color: "rgba(255,255,255,0.04)" },
+        border: { color: "rgba(255,255,255,0.06)" },
+      },
+    },
+  };
+
   return (
     <div className="chart-card">
-      <ResponsiveContainer width="100%" height={250}>
-        <AreaChart
-          data={data}
-          margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
-        >
-          <defs>
-            <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.25} />
-              <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="humGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#818cf8" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.05)"
-          />
-          <XAxis
-            dataKey="time"
-            tick={{ fill: "#6b7280", fontSize: 10, fontFamily: "Space Mono" }}
-            interval="preserveStartEnd"
-            tickLine={false}
-            axisLine={false}
-          />
-          <YAxis
-            tick={{ fill: "#6b7280", fontSize: 10, fontFamily: "Space Mono" }}
-            tickLine={false}
-            axisLine={false}
-            domain={["auto", "auto"]}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <ReferenceLine
-            y={30}
-            stroke="rgba(251,146,60,0.3)"
-            strokeDasharray="4 4"
-          />
-          <ReferenceLine
-            y={35}
-            stroke="rgba(248,113,113,0.3)"
-            strokeDasharray="4 4"
-          />
-          <Area
-            type="monotone"
-            dataKey="temperature"
-            stroke="#22d3ee"
-            strokeWidth={2}
-            fill="url(#tempGrad)"
-            dot={false}
-            activeDot={{ r: 4, fill: "#22d3ee", strokeWidth: 0 }}
-          />
-          {hasHumidity && (
-            <Area
-              type="monotone"
-              dataKey="humidity"
-              stroke="#818cf8"
-              strokeWidth={1.5}
-              fill="url(#humGrad)"
-              dot={false}
-              activeDot={{ r: 4, fill: "#818cf8", strokeWidth: 0 }}
-              strokeDasharray="5 3"
-            />
-          )}
-        </AreaChart>
-      </ResponsiveContainer>
-      <div
-        style={{
-          display: "flex",
-          gap: 20,
-          marginTop: 10,
-          justifyContent: "center",
-        }}
-      >
-        <span
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 11,
-            color: "#6b7280",
-            fontFamily: "Space Mono",
-          }}
-        >
-          <span
-            style={{
-              display: "inline-block",
-              width: 24,
-              height: 2,
-              background: "#22d3ee",
-              borderRadius: 2,
-            }}
-          />
-          Suhu (°C)
-        </span>
-        {hasHumidity && (
-          <span
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 11,
-              color: "#6b7280",
-              fontFamily: "Space Mono",
-            }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                width: 24,
-                height: 2,
-                background: "#818cf8",
-                borderRadius: 2,
-                borderTop: "2px dashed #818cf8",
-              }}
-            />
-            Kelembaban (%)
-          </span>
-        )}
+      <p className="chart-title">Riwayat Suhu</p>
+      <div style={{ position: "relative", height: 280 }}>
+        <Line data={chartData} options={options} />
       </div>
     </div>
   );
