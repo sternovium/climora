@@ -85,7 +85,7 @@ export default function App() {
             <img
               src={climoraLogo}
               alt="Climora"
-              style={{ height: 150, width: "auto" }}
+              style={{ height: 100, width: "auto" }}
             />
           </div>
           <span className="sensor-label">DHT22 · Sensor-01</span>
