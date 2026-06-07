@@ -12,11 +12,18 @@ import Snowflakes from "./components/Snowflakes";
 const today = new Date().toISOString().slice(0, 10);
 const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
 
+// Daftar sensor — tambah objek baru di sini untuk menambah card
+const SENSORS = [
+  { id: "sensor-01", name: "Ruang 01", sensorId: "Sensor-01" },
+  // { id: "sensor-02", name: "Ruang 02", sensorId: "Sensor-02" },
+  // { id: "sensor-03", name: "Ruang 03", sensorId: "Sensor-03" },
+];
+
 export default function App() {
   const [dateFrom, setDateFrom] = useState(weekAgo);
   const [dateTo, setDateTo] = useState(today);
   const [data, setData] = useState([]);
-  const [latest, setLatest] = useState(null);
+  const [latestMap, setLatestMap] = useState({});
   const [loading, setLoading] = useState(false);
   const [spinning, setSpinning] = useState(false);
   const [clock, setClock] = useState(new Date());
@@ -52,14 +59,23 @@ export default function App() {
     second: "2-digit",
   });
 
-  // Data fetching
+  // Fetch latest — kalau schema belum ada kolom sensor_id,
+  // semua card akan tampilkan data dari sensor pertama (fallback)
   const fetchLatest = useCallback(async () => {
     const { data: rows } = await supabase
       .from("sensors")
       .select("*")
       .order("recorded_at", { ascending: false })
-      .limit(1);
-    if (rows?.length) setLatest(rows[0]);
+      .limit(SENSORS.length);
+
+    if (rows?.length) {
+      const map = {};
+      SENSORS.forEach((s) => {
+        const match = rows.find((r) => r.sensor_id === s.id) ?? rows[0];
+        map[s.id] = match;
+      });
+      setLatestMap(map);
+    }
   }, []);
 
   const fetchByRange = useCallback(async () => {
@@ -86,7 +102,8 @@ export default function App() {
     setTimeout(() => setSpinning(false), 800);
   };
 
-  // Compute stats
+  const firstLatest = latestMap[SENSORS[0]?.id] ?? null;
+
   const temps = data.map((d) => d.temperature).filter((t) => t != null);
   const avg = temps.length
     ? (temps.reduce((a, b) => a + b, 0) / temps.length).toFixed(1)
@@ -95,9 +112,18 @@ export default function App() {
   const max = temps.length ? Math.max(...temps).toFixed(1) : "--";
   const count = data.length;
 
+  // Hitung kolom grid: 1 card = full, 2 = 2 kolom, 3+ = 3 kolom (max)
+  const gridCols =
+    SENSORS.length === 1
+      ? "1fr"
+      : SENSORS.length === 2
+        ? "repeat(2, 1fr)"
+        : "repeat(3, 1fr)";
+
   return (
     <div className="app">
       <Snowflakes />
+
       {/* Header */}
       <header className="header" id="dashboard-header">
         <div className="header-left">
@@ -122,11 +148,11 @@ export default function App() {
           <div className="header-divider" />
 
           <div
-            className={`status-badge ${latest ? "" : "connecting"}`}
+            className={`status-badge ${firstLatest ? "" : "connecting"}`}
             id="status-indicator"
           >
             <span className="status-dot" />
-            {latest ? "Live" : "Menghubungkan…"}
+            {firstLatest ? "Live" : "Menghubungkan…"}
           </div>
 
           <button
@@ -156,14 +182,25 @@ export default function App() {
       </header>
 
       <main className="main">
-        {/* Sensor Card Grid */}
-        <div className="sensor-grid" id="sensor-cards-grid">
-          <SensorCard
-            name="Ruang 01"
-            temperature={latest?.temperature ?? null}
-            humidity={latest?.humidity ?? null}
-            lastUpdated={latest?.recorded_at}
-          />
+        {/* Sensor Grid */}
+        <div
+          className="sensor-grid"
+          id="sensor-cards-grid"
+          style={{ gridTemplateColumns: gridCols }}
+        >
+          {SENSORS.map((sensor) => {
+            const latest = latestMap[sensor.id];
+            return (
+              <SensorCard
+                key={sensor.id}
+                name={sensor.name}
+                sensorLabel={sensor.sensorId}
+                temperature={latest?.temperature ?? null}
+                humidity={latest?.humidity ?? null}
+                lastUpdated={latest?.recorded_at}
+              />
+            );
+          })}
         </div>
 
         {/* Stats */}
@@ -225,9 +262,9 @@ export default function App() {
       <footer className="footer" id="dashboard-footer">
         <span className="footer-brand">Climora v1.0</span>
         <span>
-          {latest
+          {firstLatest
             ? `Terakhir diperbarui: ${new Date(
-                latest.recorded_at,
+                firstLatest.recorded_at,
               ).toLocaleString("id-ID", {
                 day: "numeric",
                 month: "short",
