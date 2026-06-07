@@ -49,7 +49,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const formattedTime = clock.toLocaleString("id-ID", {
+  const formattedTime = clock.toLocaleString("en-US", {
     weekday: "short",
     day: "numeric",
     month: "short",

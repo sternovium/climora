@@ -6,13 +6,12 @@ export default function SensorCard({
   lastUpdated,
 }) {
   const getStatus = (temp) => {
-    if (temp == null)
-      return { label: "Tidak ada data", cls: "normal", icon: "—" };
-    if (temp >= 32) return { label: "Alarm", cls: "danger", icon: "🔴" };
-    if (temp >= 28) return { label: "Peringatan", cls: "warning", icon: "🟡" };
-    if (temp < 18) return { label: "Alarm", cls: "danger", icon: "🔴" };
-    if (temp < 22) return { label: "Peringatan", cls: "warning", icon: "🟡" };
-    return { label: "Normal", cls: "normal", icon: "🟢" };
+    if (temp == null) return { label: "Tidak ada data", cls: "normal" };
+    if (temp >= 32) return { label: "Alarm", cls: "danger" };
+    if (temp >= 28) return { label: "Peringatan", cls: "warning" };
+    if (temp < 18) return { label: "Alarm", cls: "danger" };
+    if (temp < 22) return { label: "Peringatan", cls: "warning" };
+    return { label: "Normal", cls: "normal" };
   };
 
   const status = getStatus(temperature);
@@ -44,10 +43,11 @@ export default function SensorCard({
           <span className="sensor-card-sensor-id">DHT22 · {sensorLabel}</span>
         </div>
 
-        {/* Readings */}
+        {/* Readings — dua kolom */}
         {hasData ? (
           <>
             <div className="sensor-card-readings">
+              {/* Kolom kiri: Suhu */}
               <div className="sensor-card-temp">
                 <span className="sensor-card-temp-label">Suhu</span>
                 <span className="sensor-card-temp-value">
@@ -55,12 +55,17 @@ export default function SensorCard({
                   <span className="sensor-card-temp-unit">°C</span>
                 </span>
               </div>
+
+              {/* Divider vertikal */}
+              <div className="sensor-card-divider" />
+
+              {/* Kolom kanan: Kelembaban */}
               {humidity != null && (
-                <div className="sensor-card-humidity">
-                  <span className="sensor-card-humidity-icon">
+                <div className="sensor-card-humidity-col">
+                  <div className="sensor-card-humidity-icon-wrap">
                     <svg
-                      width="14"
-                      height="14"
+                      width="22"
+                      height="22"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -70,16 +75,19 @@ export default function SensorCard({
                     >
                       <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
                     </svg>
-                  </span>
-                  <div>
-                    <div className="sensor-card-humidity-label">Kelembaban</div>
-                    <div className="sensor-card-humidity-value">
-                      {humidity.toFixed(1)}%
-                    </div>
                   </div>
+                  <span className="sensor-card-humidity-label-lg">
+                    Kelembaban
+                  </span>
+                  <span className="sensor-card-humidity-value-lg">
+                    {humidity.toFixed(1)}
+                    <span className="sensor-card-humidity-unit">%</span>
+                  </span>
                 </div>
               )}
             </div>
+
+            {/* Footer */}
             <div className="sensor-card-footer">
               <span className={`sensor-card-status ${status.cls}`}>
                 <span className="sensor-card-status-dot" />

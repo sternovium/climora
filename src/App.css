@@ -415,66 +415,133 @@ body {
 
 .sensor-card-readings {
   display: flex;
-  align-items: flex-end;
-  gap: 32px;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  flex: 1;
+  min-height: 100px;
 }
 
+/* Kolom kiri: Suhu */
 .sensor-card-temp {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  padding-right: 24px;
 }
 
 .sensor-card-temp-label {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 1px;
 }
 
 .sensor-card-temp-value {
-  font-size: 48px;
+  font-size: 64px;
   font-weight: 800;
   line-height: 1;
   color: var(--text);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -2px;
+  letter-spacing: -3px;
 }
 
 .sensor-card-temp-unit {
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 500;
   color: var(--text-muted);
   margin-left: 2px;
+  letter-spacing: 0;
 }
 
-.sensor-card-humidity {
+/* Divider vertikal */
+.sensor-card-divider {
+  width: 1px;
+  background: var(--border);
+  margin: 0 24px;
+  flex-shrink: 0;
+}
+
+/* Kolom kanan: Kelembaban */
+.sensor-card-humidity-col {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
   gap: 6px;
-  padding: 8px 14px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
+  flex: 1;
+  padding-left: 4px;
 }
 
-.sensor-card-humidity-icon {
+.sensor-card-humidity-icon-wrap {
   color: var(--accent);
   display: flex;
   align-items: center;
 }
 
-.sensor-card-humidity-label {
+.sensor-card-humidity-label-lg {
   font-size: 11px;
+  font-weight: 600;
   color: var(--text-muted);
-  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.sensor-card-humidity-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
+.sensor-card-humidity-value-lg {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent-light);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -2px;
+}
+
+.sensor-card-humidity-unit {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: 1px;
+  letter-spacing: 0;
+}
+
+.sensor-card-no-data {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 32px 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive: di layar kecil tumpuk vertikal */
+@media (max-width: 480px) {
+  .sensor-card-readings {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sensor-card-divider {
+    width: 100%;
+    height: 1px;
+    margin: 0;
+  }
+
+  .sensor-card-temp {
+    padding-right: 0;
+  }
+
+  .sensor-card-temp-value {
+    font-size: 52px;
+  }
+
+  .sensor-card-humidity-value-lg {
+    font-size: 40px;
+  }
 }
 
 .sensor-card-footer {
