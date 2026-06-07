@@ -20,15 +20,17 @@ ChartJS.register(
   Legend,
 );
 
-export default function TemperatureChart({ data }) {
+export default function TemperatureChart({ data, theme }) {
   if (!data || data.length === 0) {
     return (
       <div className="chart-card">
-        <p className="chart-title">Riwayat Suhu</p>
+        <p className="chart-title">Tren Suhu</p>
         <div className="chart-empty">Tidak ada data untuk ditampilkan.</div>
       </div>
     );
   }
+
+  const isDark = theme === "dark";
 
   const labels = data.map((d) =>
     new Date(d.recorded_at).toLocaleString("id-ID", {
@@ -40,32 +42,42 @@ export default function TemperatureChart({ data }) {
   );
   const temps = data.map((d) => d.temperature);
 
+  const lineColor = isDark ? "#4A90D9" : "#2D7DD2";
+  const gridColor = isDark ? "rgba(42, 63, 90, 0.5)" : "rgba(208, 227, 245, 0.8)";
+  const borderColor = isDark ? "rgba(42, 63, 90, 0.3)" : "rgba(208, 227, 245, 0.5)";
+  const tickColor = isDark ? "#7A9BBD" : "#5A7A9A";
+  const tooltipBg = isDark ? "rgba(26, 42, 63, 0.95)" : "rgba(255, 255, 255, 0.95)";
+  const tooltipTitle = isDark ? "#E8F0FE" : "#1A2A3F";
+  const tooltipBody = isDark ? "#7A9BBD" : "#5A7A9A";
+  const tooltipBorder = isDark ? "rgba(42, 63, 90, 0.6)" : "rgba(208, 227, 245, 0.8)";
+  const limitColor = isDark ? "rgba(240, 112, 112, 0.4)" : "rgba(192, 57, 43, 0.35)";
+
   const chartData = {
     labels,
     datasets: [
       {
         label: "Suhu sensor",
         data: temps,
-        borderColor: "#22d3ee",
+        borderColor: lineColor,
         backgroundColor: (ctx) => {
           const chart = ctx.chart;
           const { ctx: canvasCtx, chartArea } = chart;
-          if (!chartArea) return "rgba(34,211,238,0.1)";
+          if (!chartArea) return isDark ? "rgba(74, 144, 217, 0.1)" : "rgba(45, 125, 210, 0.08)";
           const gradient = canvasCtx.createLinearGradient(
             0,
             chartArea.top,
             0,
             chartArea.bottom,
           );
-          gradient.addColorStop(0, "rgba(34,211,238,0.25)");
-          gradient.addColorStop(1, "rgba(34,211,238,0.02)");
+          gradient.addColorStop(0, isDark ? "rgba(74, 144, 217, 0.25)" : "rgba(45, 125, 210, 0.15)");
+          gradient.addColorStop(1, isDark ? "rgba(74, 144, 217, 0.02)" : "rgba(45, 125, 210, 0.01)");
           return gradient;
         },
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 5,
-        pointHoverBackgroundColor: "#22d3ee",
-        pointHoverBorderColor: "#fff",
+        pointHoverBackgroundColor: lineColor,
+        pointHoverBorderColor: isDark ? "#1A2A3F" : "#FFFFFF",
         pointHoverBorderWidth: 2,
         fill: true,
         tension: 0.4,
@@ -73,7 +85,7 @@ export default function TemperatureChart({ data }) {
       {
         label: "Batas atas (26°C)",
         data: data.map(() => 26),
-        borderColor: "rgba(248, 113, 113, 0.5)",
+        borderColor: limitColor,
         borderDash: [6, 4],
         borderWidth: 1,
         pointRadius: 0,
@@ -93,15 +105,15 @@ export default function TemperatureChart({ data }) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "rgba(18, 22, 31, 0.95)",
-        titleColor: "#e8eaf0",
-        bodyColor: "#9ca3af",
-        borderColor: "rgba(255,255,255,0.1)",
+        backgroundColor: tooltipBg,
+        titleColor: tooltipTitle,
+        bodyColor: tooltipBody,
+        borderColor: tooltipBorder,
         borderWidth: 1,
         padding: 12,
         cornerRadius: 8,
-        titleFont: { family: "Space Mono" },
-        bodyFont: { family: "DM Sans" },
+        titleFont: { family: "Inter", weight: "600" },
+        bodyFont: { family: "Inter" },
         callbacks: {
           label: (ctx) =>
             ctx.dataset.label === "Suhu sensor"
@@ -115,29 +127,29 @@ export default function TemperatureChart({ data }) {
         ticks: {
           autoSkip: true,
           maxTicksLimit: 8,
-          color: "#6b7280",
-          font: { family: "Space Mono", size: 10 },
+          color: tickColor,
+          font: { family: "Inter", size: 10, weight: "500" },
         },
-        grid: { color: "rgba(255,255,255,0.04)" },
-        border: { color: "rgba(255,255,255,0.06)" },
+        grid: { color: gridColor },
+        border: { color: borderColor },
       },
       y: {
         min: 15,
         max: 40,
         ticks: {
           callback: (v) => v + "°C",
-          color: "#6b7280",
-          font: { family: "Space Mono", size: 10 },
+          color: tickColor,
+          font: { family: "Inter", size: 10, weight: "500" },
         },
-        grid: { color: "rgba(255,255,255,0.04)" },
-        border: { color: "rgba(255,255,255,0.06)" },
+        grid: { color: gridColor },
+        border: { color: borderColor },
       },
     },
   };
 
   return (
     <div className="chart-card">
-      <p className="chart-title">Riwayat Suhu</p>
+      <p className="chart-title">Tren Suhu</p>
       <div style={{ position: "relative", height: 280 }}>
         <Line data={chartData} options={options} />
       </div>

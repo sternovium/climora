@@ -1,77 +1,33 @@
-import { useState, useRef, useEffect } from "react";
-
-export default function ThemeToggle({ theme, onToggle, onReset }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
+export default function ThemeToggle({ theme, onToggle }) {
   const isDark = theme === "dark";
 
   return (
-    <div className="theme-toggle-wrap" ref={ref}>
-      <button
-        className="theme-btn"
-        onClick={() => setOpen((o) => !o)}
-        title="Ganti tema"
-        aria-label="Ganti tema"
-      >
-        <span className="theme-icon">{isDark ? "🌙" : "☀️"}</span>
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="none"
-          style={{ marginLeft: 2, opacity: 0.5 }}
-        >
-          <path
-            d="M2 3.5L5 6.5L8 3.5"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-
-      {open && (
-        <div className="theme-dropdown">
-          <button
-            className={`theme-option ${theme === "light" ? "active" : ""}`}
-            onClick={() => {
-              if (theme !== "light") onToggle();
-              setOpen(false);
-            }}
-          >
-            <span>☀️</span> Light
-          </button>
-          <button
-            className={`theme-option ${theme === "dark" ? "active" : ""}`}
-            onClick={() => {
-              if (theme !== "dark") onToggle();
-              setOpen(false);
-            }}
-          >
-            <span>🌙</span> Dark
-          </button>
-          <div className="theme-divider" />
-          <button
-            className="theme-option"
-            onClick={() => {
-              onReset();
-              setOpen(false);
-            }}
-          >
-            <span>💻</span> Ikuti sistem
-          </button>
-        </div>
-      )}
-    </div>
+    <button
+      className="theme-toggle"
+      onClick={onToggle}
+      title={isDark ? "Beralih ke mode terang" : "Beralih ke mode gelap"}
+      aria-label="Toggle tema"
+      id="theme-toggle-btn"
+    >
+      <span className="theme-toggle-icon">
+        {isDark ? (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        )}
+      </span>
+    </button>
   );
 }
