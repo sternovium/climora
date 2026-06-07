@@ -103,7 +103,7 @@ export default function App() {
         <div className="header-left">
           <div className="header-brand">
             <img
-              src="./src/assets/climora-logo-thermo.png"
+              src="/climora-logo-thermo.png"
               alt="Climora"
               style={{ height: "46px", width: "auto", objectFit: "contain" }}
             />
