@@ -102,9 +102,11 @@ export default function App() {
       <header className="header" id="dashboard-header">
         <div className="header-left">
           <div className="header-brand">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--accent)" }}>
-              <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
-            </svg>
+            <img
+              src="./src/assets/climora-logo-thermo.png"
+              alt="Climora"
+              style={{ height: "46px", width: "auto", objectFit: "contain" }}
+            />
             <div>
               <h1 className="header-title">Climora</h1>
               <p className="header-subtitle">Dashboard Monitoring Suhu</p>
@@ -133,7 +135,16 @@ export default function App() {
             title="Refresh data"
             id="refresh-btn"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="23 4 23 10 17 10" />
               <polyline points="1 20 1 14 7 14" />
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
@@ -157,7 +168,12 @@ export default function App() {
 
         {/* Stats */}
         <div className="stats-grid" id="stats-section">
-          <StatsCard label="Rata-rata" value={`${avg}°C`} icon="μ" color="cyan" />
+          <StatsCard
+            label="Rata-rata"
+            value={`${avg}°C`}
+            icon="μ"
+            color="cyan"
+          />
           <StatsCard label="Minimum" value={`${min}°C`} icon="↓" color="blue" />
           <StatsCard label="Maksimum" value={`${max}°C`} icon="↑" color="red" />
           <StatsCard label="Jumlah data" value={count} icon="#" color="gray" />
@@ -210,7 +226,9 @@ export default function App() {
         <span className="footer-brand">Climora v1.0</span>
         <span>
           {latest
-            ? `Terakhir diperbarui: ${new Date(latest.recorded_at).toLocaleString("id-ID", {
+            ? `Terakhir diperbarui: ${new Date(
+                latest.recorded_at,
+              ).toLocaleString("id-ID", {
                 day: "numeric",
                 month: "short",
                 year: "numeric",
